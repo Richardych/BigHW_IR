@@ -6,7 +6,10 @@ class indexer:
     def __init__(self, data_path, max_block=10000):
         self.dir_path = os.path.dirname(data_path)
         self.block_dir = os.path.join(data_path, 'indexer_block')
+        self.block_path_repo = []
         self.max_block = max_block
+        """ 判断词项流是否为空 """
+        self.empty_stream = False
         """分词"""
         self.tokenstream = TokenStream(data_path)
 
@@ -23,7 +26,8 @@ class indexer:
         """ 每一个block维护一个字典和倒排记录表 """
         while block_size < self.max_block:
             tmp_term_pos_docid = self.tokenstream.get_next_term_pos_docid()
-            if tmp_term_pos is None:
+            if tmp_term_pos_docid is None:
+                self.empty_stream = True
                 break
             """ 返回不是None """
             term,term_pos,docid = tmp_term_pos_docid
@@ -40,7 +44,9 @@ class indexer:
                     inverted_index[pos].append(docid)
             block_size += 1
         return term_dic, term_cnt, inverted_index
-                
+
+    # 索引块持久化
+    def write_index_block(self, block_path):
 
 
 
@@ -48,14 +54,22 @@ class indexer:
     def build_index_block(self):
         index_block = 0
         while True:
+            """ 用SPIMI算法构建索引块 """
+            if self.empty_stream == True:
+                break
+            term_dic, term_cnt, inverted_index = self.spimi_invert()
+            index_block += 1
+            self.block_path_repo.append(os.path.join(self.block_dir, 
+                'index_block_' + str(indexer_block)))
+            """ 索引块持久化 """
             
 
     # 构建倒排记录表和词典
     def build_indexer:
         """
         1.构建索引块,合并索引块,写入磁盘过程中压缩
-        2.对每一个块产生独立的词典
-        3.对倒排记录表不排序
+        2.对每一个块产生独立的字典，和倒排索引
+        3.对倒排记录表不需要排序
         """
         # 构建索引块
         self.build_index_block()
