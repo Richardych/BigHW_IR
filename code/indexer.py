@@ -2,6 +2,7 @@
 import os
 from tokenstream import TokenStream
 from singlestringcomp import Singlestringcomp
+from gamma import Gamma
 
 class indexer:
     def __init__(self, data_path, max_block=10000):
@@ -56,10 +57,8 @@ class indexer:
             temp_lst[i] = inverted_index[v]
         """ 对字典进行单一字符串压缩 和 持久化 """
         Singlestringcomp.write_dic(term_dic_sorted, block_path + '_sscompdic')
-        """ Gamma """
-         
-
-
+        """ 先把未Gamma压缩的倒排记录表写入磁盘, 与压缩的排序的字典对应 """
+        Gamma.write_invert_index_noencode(temp_lst, block_path + '_invindex')
 
     # 构建索引块
     def build_index_block(self):
