@@ -1,5 +1,7 @@
 # coding=utf-8
 import os
+import csv
+import heapq
 from tokenstream import TokenStream
 from singlestringcomp import Singlestringcomp
 from gamma import Gamma
@@ -70,36 +72,93 @@ class indexer:
             index_block += 1
             """ ../../index_block_1/2/3... """
             self.block_path_repo.append(os.path.join(self.block_dir, 
-                'index_block_' + str(index_block)))
+                'indexer_block_' + str(index_block)))
             """ 索引块持久化 """
             self.write_index_block(self.block_path_repo[-1], term_dic, inverted_index)
 
             if self.empty_stream:
                 break
             
-            
+    # 合并索引块    
+    def merge_index_block(self):
+        """
+        从原来持久化的索引块取出倒排索引和词项
+        block_dic: 放每个索引块的词典
+        block_invindex_csv: 放每个索引块的倒排索引
+        all_term_dic: 合并的总词典
+        all_invindex: 合并的总倒排索引
+        """
+        block_dic = []
+        block_invindex_csv = []
+        all_term_dic = []
+        all_invindex = []
+        for path_i in self.block_path_repo:
+            with open(path_i + '_sscompdic', 'r') as f:
+                datalines = f.readlines()
+                block_dic.append(Singlestringcomp.ssdecompress(datalines))
+            block_invindex_csv.append(csv.reader(open(path_i + '_invindex', 'r'), delimiter=' '))
+        
+        """ 
+        用来记录每一个词典里有多少词已经加入到总词典all_term_dic [0,0,0] for example
+        其docID 也已经加入到all_invindex
+        """
+        block_dic_pt = [0] * len(block_dic)
+        """ 维护一个堆队列，只子节点和父节点排序，存词典，为了pop有序 """
+        dic_heap = []
+        heapq.heapify(dic_heap)
+
+        while True:
+            flag = True
+            for i in range(len(block_dic)):
+                if block_dic_pt[i] >= len(block_dic[i]):
+                    continue
+                flag = False
+                """ 按序依次把每个文档词典加入到优先级队列 """
+                tmp_term = block_dic[i][block_dic_pt[i]]
+                if tmp_term in dic_heap:
+                    continue
+                else:
+                    heapq.heappush(dic_heap, tmp_term)
+            """ 如果词典合并完毕，结束合并 """
+            if flag:
+                break
+            """ 输出 最小 词项 """
+            top_term = heapq.heappop(dic_heap)
+            all_term_dic.append(top_term)
+            tmp_merge_docid = []
+            for i in range(len(block_dic)):
+                if block_dic_pt[i] >= len(block_dic[i]):
+                    continue
+                """ 找到与堆队列里最高优先级词项对应的倒排记录表,合并相同词项的文档ID """
+                if block_dic[i][block_dic_pt[i]] != top_term:
+                    continue
+                """ 取出对应的倒排记录表中对应词项的docID列表 """
+                i_docid = block_invindex_csv[i].next()
+                for id_i in i_docid:
+                    if int(id_i) not in tmp_merge_docid:
+                        tmp_merge_docid.append(int(id_i))
+                block_dic_pt[i] += 1
+            all_invindex.append(tmp_merge_docid)
+        return all_term_dic,all_invindex
+
 
     # 构建倒排记录表和词典
     def build_indexer(self):
         """
-        1.构建索引块,合并索引块,写入磁盘过程中压缩
-        2.对每一个块产生独立的字典，和倒排索引
-        3.对倒排记录表不需要排序
+        1.用spimi-invert对每个块产生独立的词典和倒排索引,建索引块,写入磁盘
+        2.合并索引块,写入磁盘过程中压缩
         """
-        # 构建索引块
+        """ 构建索引块 """
         self.build_index_block()
+        """ 合并索引块, """
+        all_term_dic, all_invindex = self.merge_index_block()
+        print all_term_dic
+        print all_invindex
+
         return 
 
 if __name__ == '__main__':
     idx = indexer('/home/superhui/Informationretrieval/IR/BigHW_IR/data/doc')
     idx.build_indexer()
-
-
-
-
-
-
-
-
 
 
