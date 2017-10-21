@@ -14,7 +14,7 @@ class Singlestringcomp:
         dic_sscomp: 2an3you2me...        
         """
         tmp = ''
-        for k,v in sorted_dic:
+        for k in sorted_dic:
             tmp += str(len(k))
             tmp += k
         return tmp
