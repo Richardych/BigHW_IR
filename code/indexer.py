@@ -113,7 +113,7 @@ class indexer:
                 if block_dic_pt[i] >= len(block_dic[i]):
                     continue
                 flag = False
-                """ 按序依次把每个文档词典加入到优先级队列 """
+                """ 按序依次把每个文档词典加入到小顶堆 """
                 tmp_term = block_dic[i][block_dic_pt[i]]
                 if tmp_term in dic_heap:
                     continue
@@ -129,7 +129,7 @@ class indexer:
             for i in range(len(block_dic)):
                 if block_dic_pt[i] >= len(block_dic[i]):
                     continue
-                """ 找到与堆队列里最高优先级词项对应的倒排记录表,合并相同词项的文档ID """
+                """ 找到与堆里词项对应的倒排记录表,合并相同词项的文档ID """
                 if block_dic[i][block_dic_pt[i]] != top_term:
                     continue
                 """ 取出对应的倒排记录表中对应词项的docID列表 """
