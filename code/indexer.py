@@ -58,7 +58,7 @@ class indexer:
             """ 将排序后的字典元素放到新list里 """
             temp_lst[i] = inverted_index[v]
         """ 对字典进行单一字符串压缩 和 持久化 """
-        Singlestringcomp.write_dic(term_dic_sorted, block_path + '_sscompdic')
+        Singlestringcomp.write_dic([k for k,v in term_dic_sorted], block_path + '_sscompdic')
         """ 先把未Gamma压缩的倒排记录表写入磁盘, 与压缩的排序的字典对应 """
         Gamma.write_invert_index_noencode(temp_lst, block_path + '_invindex')
 
@@ -70,7 +70,7 @@ class indexer:
             """ 拿到了一个索引块 """
             term_dic, term_cnt, inverted_index = self.spimi_invert()
             index_block += 1
-            """ ../../index_block_1/2/3... """
+            """ ../../indexer_block_1/2/3... """
             self.block_path_repo.append(os.path.join(self.block_dir, 
                 'indexer_block_' + str(index_block)))
             """ 索引块持久化 """
@@ -152,9 +152,10 @@ class indexer:
         self.build_index_block()
         """ 合并索引块, """
         all_term_dic, all_invindex = self.merge_index_block()
-        print all_term_dic
-        print all_invindex
-
+        """ 持久化单字符串压缩的全局词典 """
+        Singlestringcomp.write_dic(all_term_dic, os.path.join(self.dir_path, 'global_index/glo_dic'))
+        """ 持久化gamma编码的全局倒排记录表 """
+        Gamma.write_invert_index_encode(all_invindex, os.path.join(self.dir_path, 'global_index/glo_index_encode'))
         return 
 
 if __name__ == '__main__':
