@@ -5,6 +5,7 @@ import heapq
 from tokenstream import TokenStream
 from singlestringcomp import Singlestringcomp
 from gamma import Gamma
+from find import Find
 
 class indexer:
     def __init__(self, data_path, max_block=10000):
@@ -16,8 +17,14 @@ class indexer:
         self.empty_stream = False
         """分词"""
         self.tokenstream = TokenStream(data_path)
-        return 
+        """ 搜索 """
+        self.find = None
+    
+    # 获得docID和文档名的字典
+    def get_document_num(self):
+        return self.tokenstream.get_document_num()
 
+    # 做统计
     def do_statistic(self):
         term_cnt,doc_cnt = self.tokenstream.cal_term_doc()
         print "语料库词项数量:", term_cnt
@@ -162,12 +169,51 @@ class indexer:
         Singlestringcomp.write_dic(all_term_dic, os.path.join(self.dir_path, 'global_index/glo_dic'))
         """ 持久化gamma编码的全局倒排记录表 """
         Gamma.write_invert_index_encode(all_invindex, os.path.join(self.dir_path, 'global_index/glo_index_encode'))
-
-        self.do_statistic()
         return 
 
 if __name__ == '__main__':
-    idx = indexer('/home/superhui/Informationretrieval/IR/BigHW_IR/data/doc')
+    """ 程序安装路径，根据自己情况修改 """
+    install_dir = '/home/superhui/Informationretrieval/IR'
+    dir_path = os.path.join(install_dir,'BigHW_IR/data')
+    idx = indexer(os.path.join(dir_path, 'doc'))
     idx.build_indexer()
+    dic = Singlestringcomp.read_dic(os.path.join(dir_path, 'global_index/glo_dic'))
+    inverted_index = Gamma.read_invert_index_decode(os.path.join(dir_path, 'global_index/glo_index_encode'))
+
+    document_num = idx.get_document_num()
+    fd = Find(dic, inverted_index, document_num)
+    """ 查询方法为布尔，顺序为从左到右 """
+    helpinfo = "\
+                \t-q: quit the program!\n \
+                \t-s: statistic information!\n \
+                \t-c: clear screen!\n \
+                \t-x: \n \
+                \t    for example:\n \
+                \t\t-x an & name | be  =>  (an & name) | be\n \
+                \t-h: get help!\n \
+               "
+    print helpinfo
+    while True:
+        user_input = raw_input('input key words>>')
+        if user_input[:2] == '-q':
+            break
+        if user_input[:2] == '-s':
+            idx.do_statistic()
+        if user_input[:2] == '-c':
+            os.system('clear')
+        if user_input[:2] == '-h':
+            print helpinfo
+            continue
+        if user_input[:2] == '-x':
+            qinfo = user_input[2:]
+            res = fd.find(qinfo)
+            fd.show_result(res)
+            print '\n'
+
+
+
+
+
+
 
 

@@ -16,6 +16,11 @@ class TokenStream:
         self.term_cnt = 0
         self.document_num = {}
 
+    # 返回docID 和 文档标题的字典
+    def get_document_num(self):
+        return self.document_num
+
+    # 做统计
     def cal_term_doc(self):
         """
         返回：
@@ -111,16 +116,6 @@ class TokenStream:
             """ 统计词项 """
             self.term_cnt += 1 
         return (tmp_term_pos[0],tmp_term_pos[1],self.documentid)
-    
-      
-
-    
 
 if __name__ == '__main__':
-    dd = TokenStream('/home/superhui/Informationretrieval/IR/BigHW_IR/data/doc')
-    #dd.next_doc_and_term()
-    #print dd.document
-    #print dd.get_next_term()
-    #print dd.get_next_term()
-    #for i in range(10000):
-    #    print dd.get_next_term_pos_docid()
+    pass

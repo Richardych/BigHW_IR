@@ -164,11 +164,4 @@ class Gamma:
         return Gamma.entity_gamma_decode(longencodestr)
 
 if __name__ == '__main__':
-    inin = [[1,12,30],[1,2],[1,2,3,4]]
-    print Gamma.read_invert_index_decode('/home/superhui/Informationretrieval/IR/BigHW_IR/data/global_index/glo_index_encode')
-    # print Gamma.gamma_encode(4)
-    #print Gamma.gamma_decode('1110101')
-    #print Gamma.entity_gamma_decode('11000110000110011100100')
-    # print Gamma.gamma_decode('111111111101111111100')
-
-
+    pass

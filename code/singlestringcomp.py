@@ -26,6 +26,14 @@ class Singlestringcomp:
         with open(file_path, 'w') as f:
             f.writelines(dic_sscomp)
 
+    # 从压缩的词典中恢复出原词典
+    @staticmethod
+    def read_dic(file_path):
+        with open(file_path, 'r') as f:
+            dic_sscomp = f.readline()
+        return Singlestringcomp.ssdecompress(dic_sscomp)
+
+
     # 从压缩的词典中解压出原词项
     @staticmethod
     def ssdecompress(dic_sscomp):
@@ -33,14 +41,5 @@ class Singlestringcomp:
         term_dic = re.findall(r'[a-z]+', str(dic_sscomp))
         return term_dic
 
-
 if __name__ == '__main__':
-    print 'sscomp'
-    #dd = [('an',1), ('you',1), ('me',1)]
-        
-    #ss.write_dic(dd, './yyy.txt')
-
-
-
-
-    
+    pass
