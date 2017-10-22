@@ -18,6 +18,12 @@ class indexer:
         self.tokenstream = TokenStream(data_path)
         return 
 
+    def do_statistic(self):
+        term_cnt,doc_cnt = self.tokenstream.cal_term_doc()
+        print "语料库词项数量:", term_cnt
+        print "语料库文档数量:", doc_cnt
+        print "文档的平均长度:", ('%.2f')%(term_cnt*1.0/doc_cnt)
+
     # SPIMI算法构建索引块
     def spimi_invert(self):
         term_dic = {}
@@ -113,7 +119,7 @@ class indexer:
                 if block_dic_pt[i] >= len(block_dic[i]):
                     continue
                 flag = False
-                """ 按序依次把每个文档词典加入到小顶堆 """
+                """ 按序依次把每个文档词典加入到优先级队列 """
                 tmp_term = block_dic[i][block_dic_pt[i]]
                 if tmp_term in dic_heap:
                     continue
@@ -129,7 +135,7 @@ class indexer:
             for i in range(len(block_dic)):
                 if block_dic_pt[i] >= len(block_dic[i]):
                     continue
-                """ 找到与堆里词项对应的倒排记录表,合并相同词项的文档ID """
+                """ 找到与堆队列里最高优先级词项对应的倒排记录表,合并相同词项的文档ID """
                 if block_dic[i][block_dic_pt[i]] != top_term:
                     continue
                 """ 取出对应的倒排记录表中对应词项的docID列表 """
@@ -156,6 +162,8 @@ class indexer:
         Singlestringcomp.write_dic(all_term_dic, os.path.join(self.dir_path, 'global_index/glo_dic'))
         """ 持久化gamma编码的全局倒排记录表 """
         Gamma.write_invert_index_encode(all_invindex, os.path.join(self.dir_path, 'global_index/glo_index_encode'))
+
+        self.do_statistic()
         return 
 
 if __name__ == '__main__':

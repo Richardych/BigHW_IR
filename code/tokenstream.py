@@ -11,16 +11,17 @@ class TokenStream:
         self.document = None
         self.documentid = 0
         self.document_term = []
-        self.document_num = {}
         self.termpos = -1
-
-        #self.term_cnt = 0
-        #self.doc_cnt = 0
+        """ 统计term数量 和 文档数量 """
+        self.term_cnt = 0
+        self.document_num = {}
 
     def cal_term_doc(self):
         """
+        返回：
+        term_cnt: 词项数量
         """
-        pass 
+        return self.term_cnt, len(self.document_num)
 
     # 得到文档词条里的词项
     def get_term_from_doc(self, token):
@@ -67,6 +68,10 @@ class TokenStream:
             docno_name = self.document.docno.string
             """ 将 文档ID - 文档名 存到一个字典 """
             self.document_num[self.documentid] = docno_name
+
+            """ 文档标题也算如词项统计 """
+            self.term_cnt += 1
+
             """ 每一个文档转成 字符串 """
             temp = ''
             """ 把文档转成词条 """
@@ -102,9 +107,13 @@ class TokenStream:
         tmp_term_pos = self.get_next_term()
         if tmp_term_pos is None:
             return None
+        else:
+            """ 统计词项 """
+            self.term_cnt += 1 
         return (tmp_term_pos[0],tmp_term_pos[1],self.documentid)
     
-       
+      
+
     
 
 if __name__ == '__main__':
